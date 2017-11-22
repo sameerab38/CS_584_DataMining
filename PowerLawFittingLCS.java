@@ -1,8 +1,9 @@
+
 /**
- * File Name: PowerLawFitting
+ * File Name: PowerLawFittingLCS
  * 
- * Author: Sameera Bammidi
- *Created on: 14/11/2017
+ * @author SameeraBammidi
+ * Created On: 11/22/2017
  * 
  */
 import java.io.BufferedReader;
@@ -10,7 +11,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,28 +22,26 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 
 /*
- * Power law fitting Similarity
- * 1. First read output file created by SimilarityScores.java (sale and purchase separately)
- * 2. Pick a threshold of similarity and build a graph
+ * Power law fitting LCS
+ * 1. First read output file created by LCSScores.java (sale and purchase separately)
+ * 2. Pick a threshold of LCS for sale and purchase respectively and build a graph for each.
  * 3. For each company, make the graph G then find connected components, output to file < companyID , %nodes covered by CC , number of CC> 
  * 4. For each G, for node get Ego net, From all Ego nets, compute features, then use in pairs. e.g: <V_u,E_u> Output to file. 
  * 5. Use R to plot power law (that line..)
  * 6. Later, use that law to compute outlier score.
  * */
-public class PowerLawFitting
+public class PowerLawFittingLCS
 {
-
 	@SuppressWarnings("rawtypes")
-	public static void main(String[] args) throws IOException, SQLException
+	public static void main(String[] args) throws IOException
 	{
-		//HashSet<Pair> hpairs = new HashSet<Pair>();
 		System.out.println("===============================================Purchase Network===============================================");
 		HashMap<Integer, HashSet<Pair>> company_allpairs = new HashMap<Integer, HashSet<Pair>>();
 
-		File input = new File ("purchases_all_simscores.csv");
+		File input = new File ("purchases_all_lcsScores.csv");
 
 		if(!input.exists())
-			System.out.println("not found");
+			System.out.println("file not found");
 
 		BufferedReader br = new BufferedReader(new FileReader(input));
 
@@ -70,7 +68,7 @@ public class PowerLawFitting
 		System.out.println(company_allpairs.keySet());
 		br.close();
 
-		double threshold = 0.5;
+		int threshold = 10;
 		UndirectedGraph<Integer, DefaultEdge> ug;
 
 		HashSet<Set<Integer>> uniqueConnectedComponents = new HashSet<Set<Integer>>();
@@ -79,6 +77,7 @@ public class PowerLawFitting
 		HashMap<Integer,UndirectedGraph<Integer, DefaultEdge>> egoNets = new HashMap<Integer, UndirectedGraph<Integer,DefaultEdge>>();
 
 		System.out.println();
+
 		for( Integer k :company_allpairs.keySet())
 		{
 			/*System.out.println("====================");
@@ -132,16 +131,17 @@ public class PowerLawFitting
 				}
 			}
 		}
+
 		//System.out.println(" non unique ctr: "+ debug_nonuniq_ctr);
 		System.out.println(" uniq ctr: "+uniqueConnectedComponents.size());
 		Iterator<Set<Integer>> itr = uniqueConnectedComponents.iterator() ;
 
 		//ToDo: Display each company and its connected components
-					
+
 		while(itr.hasNext())
 		{			
 			Iterator<Integer> itr_in = itr.next().iterator();
-			
+
 			while(itr_in.hasNext())
 			{
 				System.out.print(itr_in.next());
@@ -150,7 +150,7 @@ public class PowerLawFitting
 					System.out.print(" , ");
 				}
 			}
-			
+
 			System.out.println();
 		}
 
@@ -163,21 +163,21 @@ public class PowerLawFitting
 		}
 
 		//Store all the connected components in a hash set
-		PrintWriter pwr = new PrintWriter(new File("purchase_all_cc_size_distribution.csv"));
+		PrintWriter pwr = new PrintWriter(new File("purchase_LCS_all_cc_size_distribution.csv"));
 		for(Set s:uniqueConnectedComponents)
 		{
 			pwr.println(s.size());
 		}
 		pwr.close();
-		
+
 		//Calculate number of vertices and edges in each egonet of purchase network
-		PrintWriter pwrEp = new PrintWriter(new File("purchase_Egonets_NodeAndEdge_Count.csv"));
+		PrintWriter pwrEp = new PrintWriter(new File("purchase_LCS_Egonets_NodeAndEdge_Count.csv"));
 		pwrEp.println("InsiderID, NodeCount, EdgeCount");
 		for(Integer egoNetKey : egoNets.keySet())
 		{
 			int nodeCount = 0;
 			int edgeCount = 0;
-			
+
 			UndirectedGraph<Integer, DefaultEdge> currentEgonet = egoNets.get(egoNetKey);
 			nodeCount = currentEgonet.vertexSet().size();
 			//System.out.println("egoNetKey: "+ egoNetKey + " nodeCount " + nodeCount);
@@ -187,17 +187,19 @@ public class PowerLawFitting
 			pwrEp.println(egoNetKey + "," + nodeCount + "," + edgeCount);
 		}
 		pwrEp.close();
-		
+
 		//System.exit(1);
+
 		System.out.println("===============================================Sale Network===============================================");
 		HashMap<Integer, HashSet<Pair>> sale_company_allpairs = new HashMap<Integer, HashSet<Pair>>();
 
-		File sale_input = new File("sale_all_simscores.csv");
+		File sale_input = new File("sale_all_lcsScores.csv");
 
-		if(!sale_input.exists())
+		if(!input.exists())
 		{
-			System.out.println("not found");
+			System.out.println("file not found");
 		}
+		
 		BufferedReader sbr = new BufferedReader(new FileReader(sale_input));
 		line = sbr.readLine();
 
@@ -232,8 +234,8 @@ public class PowerLawFitting
 		System.out.println();
 		for( Integer k :sale_company_allpairs.keySet()  )
 		{
-			System.out.println("====================");
-			System.out.println("Company "+k);
+			/*System.out.println("====================");
+			System.out.println("Company "+k);*/
 			HashSet<Pair> hp = sale_company_allpairs.get(k) ;
 			ug = CreateGraph(hp, threshold);
 			ConnectivityInspector<Integer, DefaultEdge> ci = new ConnectivityInspector<Integer, DefaultEdge>(ug);
@@ -311,16 +313,16 @@ public class PowerLawFitting
 		}
 
 		//Store all the connected components in a hash set
-		PrintWriter pwrs = new PrintWriter(new File("sale_all_cc_size_distribution.csv"));
+		PrintWriter pwrs = new PrintWriter(new File("sale_LCS_all_cc_size_distribution.csv"));
+
 		for(Set s:uniqueConnectedComponentsSale)
 		{
 			pwrs.println(s.size());
 		}
 		pwrs.close();
 		
-
 		//Calculate number of vertices and edges in each egonet of sale network
-		PrintWriter pwrEs = new PrintWriter(new File("sale_Egonets_NodeAndEdge_Count.csv"));
+		PrintWriter pwrEs = new PrintWriter(new File("sale_LCS_Egonets_NodeAndEdge_Count.csv"));
 		pwrEs.println("InsiderID, NodeCount, EdgeCount");
 		for(Integer egoNetKeySale : egoNetsSale.keySet())
 		{
@@ -337,6 +339,7 @@ public class PowerLawFitting
 		}
 		pwrEs.close();
 	}
+	
 
 	static UndirectedGraph<Integer, DefaultEdge> CreateGraph(HashSet<Pair> hpairs, double threshold)
 	{
@@ -360,7 +363,6 @@ public class PowerLawFitting
 				g.addEdge(p.id1, p.id2);
 			}	
 		}
-
 		return g;
 	}
 }
