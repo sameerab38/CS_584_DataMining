@@ -199,7 +199,7 @@ public class PowerLawFittingLCS
 		{
 			System.out.println("file not found");
 		}
-		
+
 		BufferedReader sbr = new BufferedReader(new FileReader(sale_input));
 		line = sbr.readLine();
 
@@ -225,7 +225,7 @@ public class PowerLawFittingLCS
 		System.out.println(sale_company_allpairs.keySet());
 		sbr.close();
 
-
+		threshold = 5;
 		HashSet<Set<Integer>> uniqueConnectedComponentsSale = new HashSet<Set<Integer>>();
 		int sale_debug_nonuniq_ctr = 0;
 
@@ -320,7 +320,7 @@ public class PowerLawFittingLCS
 			pwrs.println(s.size());
 		}
 		pwrs.close();
-		
+
 		//Calculate number of vertices and edges in each egonet of sale network
 		PrintWriter pwrEs = new PrintWriter(new File("sale_LCS_Egonets_NodeAndEdge_Count.csv"));
 		pwrEs.println("InsiderID, NodeCount, EdgeCount");
@@ -328,7 +328,7 @@ public class PowerLawFittingLCS
 		{
 			int nodeCount = 0;
 			int edgeCount = 0;
-			
+
 			UndirectedGraph<Integer, DefaultEdge> currentEgonet = egoNetsSale.get(egoNetKeySale);
 			nodeCount = currentEgonet.vertexSet().size();
 			//System.out.println("egoNetKey: "+ egoNetKey + " nodeCount " + nodeCount);
@@ -339,7 +339,7 @@ public class PowerLawFittingLCS
 		}
 		pwrEs.close();
 	}
-	
+
 
 	static UndirectedGraph<Integer, DefaultEdge> CreateGraph(HashSet<Pair> hpairs, double threshold)
 	{
