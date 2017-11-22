@@ -22,13 +22,13 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 
 /*
- * Power law fitting 
+ * Power law fitting Similarity
  * 1. First read output file created by SimilarityScores.java (sale and purchase separately)
  * 2. Pick a threshold of similarity and build a graph
  * 3. For each company, make the graph G then find connected components, output to file < companyID , %nodes covered by CC , number of CC> 
- * 4. Unrelated to #3 above, For each G, for node get Ego net, From all Ego nets, compute features, then use in pairs. e.g: <V_u,E_u> Output to file. 
- * 5. Use R to plot power law (that line..). ?
- * 6. Later, use that law to compute out-lier score.  
+ * 4. For each G, for node get Ego net, From all Ego nets, compute features, then use in pairs. e.g: <V_u,E_u> Output to file. 
+ * 5. Use R to plot power law (that line..)
+ * 6. Later, use that law to compute outlier score.
  * */
 public class PowerLawFitting
 {
@@ -36,7 +36,6 @@ public class PowerLawFitting
 	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws IOException, SQLException
 	{
-
 		//HashSet<Pair> hpairs = new HashSet<Pair>();
 		System.out.println("===============================================Purchase Network===============================================");
 		HashMap<Integer, HashSet<Pair>> company_allpairs = new HashMap<Integer, HashSet<Pair>>();
@@ -75,7 +74,7 @@ public class PowerLawFitting
 		UndirectedGraph<Integer, DefaultEdge> ug;
 
 		HashSet<Set<Integer>> uniqueConnectedComponents = new HashSet<Set<Integer>>();
-		int debug_nonuniq_ctr = 0;
+		//int debug_nonuniq_ctr = 0;
 
 		HashMap<Integer,UndirectedGraph<Integer, DefaultEdge>> egoNets = new HashMap<Integer, UndirectedGraph<Integer,DefaultEdge>>();
 
@@ -100,7 +99,7 @@ public class PowerLawFitting
 				{
 					//System.out.println(ii+" , "+ci.connectedSetOf(ii)+"	"+ci.connectedSetOf(ii).size()); // this displays same CC's multiple times because we are iterating on Vertices 
 					uniqueConnectedComponents.add(ci.connectedSetOf(ii));
-					debug_nonuniq_ctr++;
+					//debug_nonuniq_ctr++;
 
 					// compute it's egonet and add to global set
 					UndirectedGraph<Integer, DefaultEdge> egonet_ii = new SimpleGraph<Integer, DefaultEdge>(DefaultEdge.class);
@@ -133,7 +132,7 @@ public class PowerLawFitting
 				}
 			}
 		}
-		System.out.println(" non unique ctr: "+ debug_nonuniq_ctr);
+		//System.out.println(" non unique ctr: "+ debug_nonuniq_ctr);
 		System.out.println(" uniq ctr: "+uniqueConnectedComponents.size());
 		Iterator<Set<Integer>> itr = uniqueConnectedComponents.iterator() ;
 
@@ -170,6 +169,25 @@ public class PowerLawFitting
 			pwr.println(s.size());
 		}
 		pwr.close();
+		
+		//Calculate number of vertices and edges in each egonet of purchase network
+		PrintWriter pwrEp = new PrintWriter(new File("purchase_Egonets_NodeAndEdge_Count.csv"));
+		pwrEp.println("InsiderID, EdgeCount, NodeCount");
+		for(Integer egoNetKey : egoNets.keySet())
+		{
+			int nodeCount = 0;
+			int edgeCount = 0;
+			
+			UndirectedGraph<Integer, DefaultEdge> currentEgonet = egoNets.get(egoNetKey);
+			nodeCount = currentEgonet.vertexSet().size();
+			//System.out.println("egoNetKey: "+ egoNetKey + " nodeCount " + nodeCount);
+			edgeCount = currentEgonet.edgeSet().size();
+			//System.out.println("egoNetKey: "+ egoNetKey + " edgeCount " + edgeCount);
+			//System.out.println("======================================================");
+			pwrEp.println(egoNetKey + "," + nodeCount + "," + edgeCount);
+		}
+		pwrEp.close();
+		
 		//System.exit(1);
 		System.out.println("===============================================Sale Network===============================================");
 		HashMap<Integer, HashSet<Pair>> sale_company_allpairs = new HashMap<Integer, HashSet<Pair>>();
@@ -299,6 +317,25 @@ public class PowerLawFitting
 			pwrs.println(s.size());
 		}
 		pwrs.close();
+		
+
+		//Calculate number of vertices and edges in each egonet of sale network
+		PrintWriter pwrEs = new PrintWriter(new File("sale_Egonets_NodeAndEdge_Count.csv"));
+		pwrEs.println("InsiderID, EdgeCount, NodeCount");
+		for(Integer egoNetKeySale : egoNetsSale.keySet())
+		{
+			int nodeCount = 0;
+			int edgeCount = 0;
+			
+			UndirectedGraph<Integer, DefaultEdge> currentEgonet = egoNetsSale.get(egoNetKeySale);
+			nodeCount = currentEgonet.vertexSet().size();
+			//System.out.println("egoNetKey: "+ egoNetKey + " nodeCount " + nodeCount);
+			edgeCount = currentEgonet.edgeSet().size();
+			//System.out.println("egoNetKey: "+ egoNetKey + " edgeCount " + edgeCount);
+			//System.out.println("======================================================");
+			pwrEs.println(egoNetKeySale + "," + nodeCount + "," + edgeCount);
+		}
+		pwrEs.close();
 	}
 
 	static UndirectedGraph<Integer, DefaultEdge> CreateGraph(HashSet<Pair> hpairs, double threshold)
