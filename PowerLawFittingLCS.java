@@ -226,6 +226,8 @@ public class PowerLawFittingLCS
 		sbr.close();
 
 		threshold = 5;
+		UndirectedGraph<Integer, DefaultEdge> ugs;
+		
 		HashSet<Set<Integer>> uniqueConnectedComponentsSale = new HashSet<Set<Integer>>();
 		int sale_debug_nonuniq_ctr = 0;
 
@@ -237,8 +239,8 @@ public class PowerLawFittingLCS
 			/*System.out.println("====================");
 			System.out.println("Company "+k);*/
 			HashSet<Pair> hp = sale_company_allpairs.get(k) ;
-			ug = CreateGraph(hp, threshold);
-			ConnectivityInspector<Integer, DefaultEdge> ci = new ConnectivityInspector<Integer, DefaultEdge>(ug);
+			ugs = CreateGraph(hp, threshold);
+			ConnectivityInspector<Integer, DefaultEdge> ci = new ConnectivityInspector<Integer, DefaultEdge>(ugs);
 
 			HashSet<Integer> hi = new HashSet<Integer>();
 			for(Pair p: hp)
@@ -262,7 +264,7 @@ public class PowerLawFittingLCS
 					// iterate over all nodes in connected set, retain only those that have an edge with the ego node
 					for(Integer cn : ci.connectedSetOf(ii))
 					{
-						if(ug.containsEdge(ii, cn)){
+						if(ugs.containsEdge(ii, cn)){
 							egonet_ii.addVertex(cn);
 							//egonet_ii.addEdge(ii,cn);
 						}
@@ -273,7 +275,7 @@ public class PowerLawFittingLCS
 						for(Integer cn2 : egonet_ii.vertexSet())
 						{
 							if(cn==cn2) continue;
-							if(ug.containsEdge(cn, cn2))
+							if(ugs.containsEdge(cn, cn2))
 							{
 								egonet_ii.addEdge(cn,cn2);
 							}
