@@ -2,8 +2,8 @@
  * Java implementation of Local Outlier Factor algorithm by [Markus M. Breunig](http://www.dbs.ifi.lmu.de/Publikationen/Papers/LOF.pdf). 
  * The implementation accepts a collection `double[]` arrays, where each array of doubles corresponds to an instance.  
  *
- * Modified: Sameera Bammidi, Nov 26th.
- * In the main method, wrote the implementation to compute LOF and total outlier score for purchase and sale network
+ * Modified: Sameera Bammidi, Nov 26th, 2017.
+ * In the main method, I wrote the implementation to compute LOF and total outlier score for purchase and sale network
  * with similarity score and LCS based approaches.
  */
 
@@ -44,6 +44,165 @@ public class LOF
 
 	private Distance distanceMeasure;
 
+	/**
+	 * @author Sameera Bammidi
+	 * Created On: 11/26/2017
+	 */
+	public static void main(String[] args) throws IOException
+	{		
+		int kNN = 5;
+		System.out.println("======================================================PurchaseSimilarity======================================================");
+		ArrayList<double[]> data = new ArrayList<double[]>();
+		/*data.add(new double[]{0, 0});
+		data.add(new double[]{0, 1});
+		data.add(new double[]{1, 0});
+		data.add(new double[]{1, 1});
+		data.add(new double[]{1, 2});
+		data.add(new double[]{2, 1});
+		data.add(new double[]{2, 2});
+		data.add(new double[]{2, 0});
+		data.add(new double[]{2, 0});
+		data.add(new double[]{2, 0});
+		data.add(new double[]{2, 0});*/ 
+
+		BufferedReader fr =  new BufferedReader(new FileReader(new File("purchase_sim_outlierscores.csv")));
+		String line = fr.readLine(); // read and ignore first line
+		while((line = fr.readLine()) != null)
+		{			
+			String[] tokens = line.split(",");
+			data.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
+		}
+		fr.close();
+		LOF model = new LOF(data);
+
+		System.out.println("LOF values on training examples");
+		double[] scores = model.getTrainingScores(kNN);
+		for(int i = 0; i < scores.length; i++)
+		{
+			System.out.println(Arrays.toString(data.get(i)) + "\t" + scores[i]);
+		}
+
+		PrintWriter pwr = new PrintWriter(new File("purchase_sim_outlierscores_withLOF.csv"));
+		fr =  new BufferedReader(new FileReader(new File("purchase_sim_outlierscores.csv")));
+		line = fr.readLine(); // read and ignore first line
+		int i = 0;
+		pwr.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
+		while((line = fr.readLine()) != null)
+		{
+			String[] lineTokens = line.split(",");
+			double score = scores[i++];
+			double tos = Double.parseDouble(lineTokens[4]) + score;
+			pwr.println(line+","+score+","+ tos);
+		}
+		fr.close();
+		pwr.close();
+
+		System.out.println("======================================================SaleSimilarity======================================================");
+
+		ArrayList<double[]> dataSaleSim = new ArrayList<double[]>();
+
+		BufferedReader frss =  new BufferedReader(new FileReader(new File("sale_sim_outlierscores.csv")));
+		line = frss.readLine(); // read and ignore first line
+		while((line = frss.readLine()) != null)
+		{			
+			String[] tokens = line.split(",");
+			dataSaleSim.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
+		}
+		frss.close();
+		LOF modelSaleSim = new LOF(dataSaleSim);
+
+		System.out.println("LOF values on training examples");
+		double[] scoresSaleSim = modelSaleSim.getTrainingScores(kNN);
+		for(int is = 0; is < scoresSaleSim.length; is++)
+		{
+			System.out.println(Arrays.toString(dataSaleSim.get(is)) + "\t" + scoresSaleSim[is]);
+		}
+
+		PrintWriter pwrss = new PrintWriter(new File("sale_sim_outlierscores_withLOF.csv"));
+		frss =  new BufferedReader(new FileReader(new File("sale_sim_outlierscores.csv")));
+		line = frss.readLine(); // read and ignore first line
+		i = 0;
+		pwrss.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
+		while((line = frss.readLine()) != null)
+		{
+			String[] lineTokens = line.split(",");
+			double score = scoresSaleSim[i++];
+			double tos = Double.parseDouble(lineTokens[4]) + score;
+			pwrss.println(line+","+score+","+tos);
+		}
+		frss.close();
+		pwrss.close();
+
+		System.out.println("======================================================PurchaseLCS======================================================");
+		ArrayList<double[]> dataPurchaseLCS = new ArrayList<double[]>();
+
+		BufferedReader frpl =  new BufferedReader(new FileReader(new File("purchase_LCS_outlierscores.csv")));
+		line = frpl.readLine(); // read and ignore first line
+		while((line = frpl.readLine()) != null)
+		{			
+			String[] tokens = line.split(",");
+			dataPurchaseLCS.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
+		}
+		frpl.close();
+		LOF modelPurchaseLCS = new LOF(dataPurchaseLCS);
+
+		System.out.println("LOF values on training examples");
+		double[] scoresPurchaseLCS = modelPurchaseLCS.getTrainingScores(kNN);
+		for(int is = 0; is < scoresPurchaseLCS.length; is++)
+		{
+			System.out.println(Arrays.toString(dataPurchaseLCS.get(is)) + "\t" + scoresPurchaseLCS[is]);
+		}
+
+		PrintWriter pwrpl = new PrintWriter(new File("purchase_LCS_outlierscores_withLOF.csv"));
+		frpl =  new BufferedReader(new FileReader(new File("purchase_LCS_outlierscores.csv")));
+		line = frpl.readLine(); // read and ignore first line
+		i = 0;
+		pwrpl.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
+		while((line = frpl.readLine()) != null)
+		{
+			String[] lineTokens = line.split(",");
+			double score = scoresPurchaseLCS[i++];
+			double tos = Double.parseDouble(lineTokens[4]) + score;
+			pwrpl.println(line+","+score+","+tos);
+		}
+		frpl.close();
+		pwrpl.close();
+
+		System.out.println("======================================================SaleLCS======================================================");
+		ArrayList<double[]> dataSaleLCS = new ArrayList<double[]>();
+
+		BufferedReader frsl =  new BufferedReader(new FileReader(new File("sale_LCS_outlierscores.csv")));
+		line = frsl.readLine(); // read and ignore first line
+		while((line = frsl.readLine()) != null)
+		{			
+			String[] tokens = line.split(",");
+			dataSaleLCS.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
+		}
+		frsl.close();
+		LOF modelSaleLCS = new LOF(dataSaleLCS);
+
+		System.out.println("LOF values on training examples");
+		double[] scoresSaleLCS = modelSaleLCS.getTrainingScores(kNN);
+		for(int is = 0; is < scoresSaleLCS.length; is++)
+		{
+			System.out.println(Arrays.toString(dataSaleLCS.get(is)) + "\t" + scoresSaleLCS[is]);
+		}
+
+		PrintWriter pwrsl = new PrintWriter(new File("sale_LCS_outlierscores_withLOF.csv"));
+		frsl =  new BufferedReader(new FileReader(new File("sale_LCS_outlierscores.csv")));
+		line = frsl.readLine(); // read and ignore first line
+		i = 0;
+		pwrsl.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
+		while((line = frsl.readLine()) != null)
+		{
+			String[] lineTokens = line.split(",");
+			double score = scoresSaleLCS[i++];
+			double tos = Double.parseDouble(lineTokens[4]) + score;
+			pwrsl.println(line+","+score+","+tos);
+		}
+		frsl.close();
+		pwrsl.close();
+	}
 	public LOF(Collection<double[]> trainCollection)
 	{
 		this(trainCollection, Distance.EUCLIDIAN);
@@ -282,164 +441,5 @@ public class LOF
 				.mapToInt(ele -> ele).toArray();
 		return sortedIndices;
 	}
-
-	/**
-	 * @author Sameera Bammidi
-	 * Created On: 11/26/2017
-	 */
-	public static void main(String[] args) throws IOException
-	{		
-		int kNN = 5;
-		System.out.println("======================================================PurchaseSimilarity======================================================");
-		ArrayList<double[]> data = new ArrayList<double[]>();
-		/*data.add(new double[]{0, 0});
-		data.add(new double[]{0, 1});
-		data.add(new double[]{1, 0});
-		data.add(new double[]{1, 1});
-		data.add(new double[]{1, 2});
-		data.add(new double[]{2, 1});
-		data.add(new double[]{2, 2});
-		data.add(new double[]{2, 0});
-		data.add(new double[]{2, 0});
-		data.add(new double[]{2, 0});
-		data.add(new double[]{2, 0});*/ 
-
-		BufferedReader fr =  new BufferedReader(new FileReader(new File("purchase_sim_outlierscores.csv")));
-		String line = fr.readLine(); // read and ignore first line
-		while((line = fr.readLine()) != null)
-		{			
-			String[] tokens = line.split(",");
-			data.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
-		}
-		fr.close();
-		LOF model = new LOF(data);
-
-		System.out.println("LOF values on training examples");
-		double[] scores = model.getTrainingScores(kNN);
-		for(int i = 0; i < scores.length; i++)
-		{
-			System.out.println(Arrays.toString(data.get(i)) + "\t" + scores[i]);
-		}
-
-		PrintWriter pwr = new PrintWriter(new File("purchase_sim_outlierscores_withLOF.csv"));
-		fr =  new BufferedReader(new FileReader(new File("purchase_sim_outlierscores.csv")));
-		line = fr.readLine(); // read and ignore first line
-		int i = 0;
-		pwr.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
-		while((line = fr.readLine()) != null)
-		{
-			String[] lineTokens = line.split(",");
-			double score = scores[i++];
-			double tos = Double.parseDouble(lineTokens[4]) + score;
-			pwr.println(line+","+score+","+ tos);
-		}
-		fr.close();
-		pwr.close();
-
-		System.out.println("======================================================SaleSimilarity======================================================");
-
-		ArrayList<double[]> dataSaleSim = new ArrayList<double[]>();
-
-		BufferedReader frss =  new BufferedReader(new FileReader(new File("sale_sim_outlierscores.csv")));
-		line = frss.readLine(); // read and ignore first line
-		while((line = frss.readLine()) != null)
-		{			
-			String[] tokens = line.split(",");
-			dataSaleSim.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
-		}
-		frss.close();
-		LOF modelSaleSim = new LOF(dataSaleSim);
-
-		System.out.println("LOF values on training examples");
-		double[] scoresSaleSim = modelSaleSim.getTrainingScores(kNN);
-		for(int is = 0; is < scoresSaleSim.length; is++)
-		{
-			System.out.println(Arrays.toString(dataSaleSim.get(is)) + "\t" + scoresSaleSim[is]);
-		}
-
-		PrintWriter pwrss = new PrintWriter(new File("sale_sim_outlierscores_withLOF.csv"));
-		frss =  new BufferedReader(new FileReader(new File("sale_sim_outlierscores.csv")));
-		line = frss.readLine(); // read and ignore first line
-		i = 0;
-		pwrss.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
-		while((line = frss.readLine()) != null)
-		{
-			String[] lineTokens = line.split(",");
-			double score = scoresSaleSim[i++];
-			double tos = Double.parseDouble(lineTokens[4]) + score;
-			pwrss.println(line+","+score+","+tos);
-		}
-		frss.close();
-		pwrss.close();
-
-		System.out.println("======================================================PurchaseLCS======================================================");
-		ArrayList<double[]> dataPurchaseLCS = new ArrayList<double[]>();
-
-		BufferedReader frpl =  new BufferedReader(new FileReader(new File("purchase_LCS_outlierscores.csv")));
-		line = frpl.readLine(); // read and ignore first line
-		while((line = frpl.readLine()) != null)
-		{			
-			String[] tokens = line.split(",");
-			dataPurchaseLCS.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
-		}
-		frpl.close();
-		LOF modelPurchaseLCS = new LOF(dataPurchaseLCS);
-
-		System.out.println("LOF values on training examples");
-		double[] scoresPurchaseLCS = modelPurchaseLCS.getTrainingScores(kNN);
-		for(int is = 0; is < scoresPurchaseLCS.length; is++)
-		{
-			System.out.println(Arrays.toString(dataPurchaseLCS.get(is)) + "\t" + scoresPurchaseLCS[is]);
-		}
-
-		PrintWriter pwrpl = new PrintWriter(new File("purchase_LCS_outlierscores_withLOF.csv"));
-		frpl =  new BufferedReader(new FileReader(new File("purchase_LCS_outlierscores.csv")));
-		line = frpl.readLine(); // read and ignore first line
-		i = 0;
-		pwrpl.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
-		while((line = frpl.readLine()) != null)
-		{
-			String[] lineTokens = line.split(",");
-			double score = scoresPurchaseLCS[i++];
-			double tos = Double.parseDouble(lineTokens[4]) + score;
-			pwrpl.println(line+","+score+","+tos);
-		}
-		frpl.close();
-		pwrpl.close();
-
-		System.out.println("======================================================SaleLCS======================================================");
-		ArrayList<double[]> dataSaleLCS = new ArrayList<double[]>();
-
-		BufferedReader frsl =  new BufferedReader(new FileReader(new File("sale_LCS_outlierscores.csv")));
-		line = frsl.readLine(); // read and ignore first line
-		while((line = frsl.readLine()) != null)
-		{			
-			String[] tokens = line.split(",");
-			dataSaleLCS.add(new double[]{Math.log10(Integer.parseInt(tokens[2])), Math.log10(Integer.parseInt(tokens[3]))});
-		}
-		frsl.close();
-		LOF modelSaleLCS = new LOF(dataSaleLCS);
-
-		System.out.println("LOF values on training examples");
-		double[] scoresSaleLCS = modelSaleLCS.getTrainingScores(kNN);
-		for(int is = 0; is < scoresSaleLCS.length; is++)
-		{
-			System.out.println(Arrays.toString(dataSaleLCS.get(is)) + "\t" + scoresSaleLCS[is]);
-		}
-
-		PrintWriter pwrsl = new PrintWriter(new File("sale_LCS_outlierscores_withLOF.csv"));
-		frsl =  new BufferedReader(new FileReader(new File("sale_LCS_outlierscores.csv")));
-		line = frsl.readLine(); // read and ignore first line
-		i = 0;
-		pwrsl.println("No., InsiderId, NodeCount, EdgeCount, OutlierScore, LOF, TotalOutlierScore");
-		while((line = frsl.readLine()) != null)
-		{
-			String[] lineTokens = line.split(",");
-			double score = scoresSaleLCS[i++];
-			double tos = Double.parseDouble(lineTokens[4]) + score;
-			pwrsl.println(line+","+score+","+tos);
-		}
-		frsl.close();
-		pwrsl.close();
-	}	
+	
 }
