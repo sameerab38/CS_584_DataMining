@@ -2,7 +2,7 @@
  * File Name: Pair
  * 
  * Author: Sameera Bammidi
- *Created on: 11/10/2017
+ * Created on: 11/10/2017
  * 
  */
 public class Pair {
@@ -12,13 +12,15 @@ public class Pair {
 	
 	double score = -1; // the similarity score for this pair , initialized with a meaning less value
 	
-	public Pair(int id1, int id2) {
+	public Pair(int id1, int id2)
+	{
 		super();
 		this.id1 = id1;
 		this.id2 = id2;
 	}
 
-	public Pair(int id1, int id2, double sscore) {
+	public Pair(int id1, int id2, double sscore)
+	{
 		super();
 		this.id1 = id1;
 		this.id2 = id2;
@@ -26,7 +28,8 @@ public class Pair {
 	}
 
 	@Override
-	public int hashCode() {
+	public int hashCode()
+	{
 		final int prime = 31;
 		int result1 = 1;
 		result1 = prime * result1 + id1;

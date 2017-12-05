@@ -2,7 +2,7 @@
  * File Name: PowerLawFitting
  * 
  * Author: Sameera Bammidi
- *Created on: 14/11/2017
+ *Created on: 11/14/2017
  * 
  */
 import java.io.BufferedReader;

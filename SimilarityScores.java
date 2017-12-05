@@ -27,14 +27,18 @@ public class SimilarityScores
 		String query = "select distinct StockId from insidertrades2_demo"; // get stock ids
 		ResultSet rs = statement.executeQuery(query);
 
+		PrintWriter pw = new PrintWriter(new File("StockIds.csv"));
+		pw.println("StockId");
 		while(rs.next())
 		{
 			System.out.println(rs.getInt("StockId"));
 			stockids.add(rs.getInt("StockId"));
+			pw.println(rs.getInt("StockId"));
 		}
 		System.out.println(stockids.size());
 
-
+		pw.close();
+		
 		HashMap<Integer, HashSet<Pair>> purchases_company_insiderPair_map = new HashMap<Integer, HashSet<Pair>>(); 
 		HashMap<Integer, HashMap<Integer, HashSet<Date>>> purchases_company_insiderTradeDates_map = new HashMap<Integer,HashMap<Integer, HashSet<Date>>>(); 
 
@@ -42,7 +46,6 @@ public class SimilarityScores
 		HashMap<Integer, HashMap<Integer, HashSet<Date>>> sale_company_insiderTradeDates_map = new HashMap<Integer,HashMap<Integer, HashSet<Date>>>();
 
 		// for each stock id get all the PURCHASE trades and populate key=InsiderID val=Set of all his/her trade dates
-
 		for(Integer stockid : stockids)
 		{
 			HashMap<Integer, HashSet<Date>>  inid_date_map = new HashMap <Integer, HashSet<Date>>();
@@ -66,15 +69,15 @@ public class SimilarityScores
 			purchases_company_insiderTradeDates_map.put(stockid, inid_date_map);
 			// now populate the pairwise similarity score
 			// output ONE single file of all similarity scores ( 1/2 of nxn matrix since it will be symmetric (which is also a version of adj matrix))
-			// Build graph: nodes = insiderID, edges = similarity, threshold = 0.5 => remove every edge that does not have a similarity > 0.5 ? (confirm with TA)
+			// Build graph: nodes = insiderID, edges = similarity, threshold = 0.5 => remove every edge that does not have a similarity > 0.5
 			HashSet<Pair> allPurchasePairsForCurrentCompany = new HashSet<Pair>();
-			ArrayList<Integer> allInsiders = new ArrayList<Integer> ();
+			ArrayList<Integer> allInsiders = new ArrayList<Integer>();
 			allInsiders.addAll(inid_date_map.keySet());
-			for(int i=0;i<(allInsiders.size()-1);i++)
+			for(int i=0; i<(allInsiders.size()-1); i++)
 			{
-				for(int j=i+1 ; j< allInsiders.size();j++)
+				for(int j=i+1; j< allInsiders.size(); j++)
 				{
-					Pair p = new Pair(allInsiders.get(i) , allInsiders.get(j));
+					Pair p = new Pair(allInsiders.get(i), allInsiders.get(j));
 					HashSet<Date> d1 = inid_date_map.get(allInsiders.get(i));
 					HashSet<Date> d2 = inid_date_map.get(allInsiders.get(j));
 					p.setScore(computeDateBasedSimilarity(d1,d2));
@@ -82,7 +85,7 @@ public class SimilarityScores
 				}
 			}
 			purchases_company_insiderPair_map.put(stockid, allPurchasePairsForCurrentCompany);
-		}		
+		}
 
 		// for each stock id get all the SALE trades and populate key=InsiderID val=Set of all his/her trade dates
 
@@ -109,9 +112,9 @@ public class SimilarityScores
 			sale_company_insiderTradeDates_map.put(stockid, sale_inid_date_map);
 			// now populate the pairwise similarity score
 			// output ONE single file of all similarity scores ( 1/2 of nxn matrix since it will be symmetric (which is also a version of adj matrix))
-			// Build graph: nodes = insiderID, edges = similarity, threshold = 0.5 => remove every edge that does not have a similarity > 0.5 ? (confirm with TA)
+			// Build graph: nodes = insiderID, edges = similarity, threshold = 0.5 => remove every edge that does not have a similarity > 0.5
 			HashSet<Pair> allSalePairsForCurrentCompany = new HashSet<Pair>();
-			ArrayList<Integer> allSaleInsiders = new ArrayList<Integer> ();
+			ArrayList<Integer> allSaleInsiders = new ArrayList<Integer>();
 			allSaleInsiders.addAll(sale_inid_date_map.keySet());
 
 			for(int i=0;i<(allSaleInsiders.size()-1);i++)

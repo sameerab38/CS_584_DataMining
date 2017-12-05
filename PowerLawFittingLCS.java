@@ -1,10 +1,9 @@
 
 /**
- * File Name: PowerLawFittingLCS
- * 
  * @author SameeraBammidi
  * Created On: 11/22/2017
  * 
+ *  File Name: PowerLawFittingLCS
  */
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,8 +58,10 @@ public class PowerLawFittingLCS
 				hpairs = new HashSet<Pair>();
 				company_allpairs.put(Integer.parseInt(tokens[0]),hpairs);
 			}
-			else hpairs = 
-					company_allpairs.get(Integer.parseInt(tokens[0]));
+			else
+			{
+				hpairs = company_allpairs.get(Integer.parseInt(tokens[0]));
+			}
 
 			hpairs.add(new Pair(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]), Double.parseDouble(tokens[3])));
 
@@ -227,7 +228,7 @@ public class PowerLawFittingLCS
 
 		threshold = 5;
 		UndirectedGraph<Integer, DefaultEdge> ugs;
-		
+
 		HashSet<Set<Integer>> uniqueConnectedComponentsSale = new HashSet<Set<Integer>>();
 		int sale_debug_nonuniq_ctr = 0;
 
