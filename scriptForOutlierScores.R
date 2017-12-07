@@ -1,4 +1,4 @@
-setwd("C:/Users/samee/Documents/CS584/code_javaSE/project")
+setwd("C:/Users/samee/Documents/CS584/code_javaSE/project/Bigdata_Set")
 dist = read.csv("purchase_Egonets_NodeAndEdge_Count.csv")
 str(dist)
 fit = lm( log(dist$EdgeCount,10) ~ log(dist$NodeCount,10))
@@ -40,7 +40,7 @@ ggplot(data = dist, aes(x = log(V3,10), y = log(V4,10))) +
     geom_point(colour = "green", size = 3)+geom_abline(intercept=fit$coefficients[1], slope=fit$coefficients[2])
 
 #======================================================================================================================
-setwd("C:/Users/samee/Documents/CS584/code_javaSE/project")
+setwd("C:/Users/samee/Documents/CS584/code_javaSE/project/Bigdata_Set")
 dist = read.csv("sale_Egonets_NodeAndEdge_Count.csv")
 str(dist)
 fit = lm( log(dist$EdgeCount,10) ~ log(dist$NodeCount,10))
@@ -68,7 +68,7 @@ ggplot(data = dist, aes(x = log(NodeCount,10), y = log(EdgeCount,10))) +
 write.csv(dist,file="sale_sim_outlierscores.csv")
 
 #=============================================================================================================================
-setwd("C:/Users/samee/Documents/CS584/code_javaSE/project")
+setwd("C:/Users/samee/Documents/CS584/code_javaSE/project/Bigdata_Set")
 dist = read.csv("purchase_LCS_Egonets_NodeAndEdge_Count.csv")
 
 str(dist)
@@ -99,7 +99,7 @@ ggplot(data = dist, aes(x = log(NodeCount,10), y = log(EdgeCount,10))) +
 write.csv(dist,file="purchase_LCS_outlierscores.csv")
 
 #=============================================================================================================================
-setwd("C:/Users/samee/Documents/CS584/code_javaSE/project")
+setwd("C:/Users/samee/Documents/CS584/code_javaSE/project/Bigdata_Set")
 dist = read.csv("sale_LCS_Egonets_NodeAndEdge_Count.csv")
 
 str(dist)
